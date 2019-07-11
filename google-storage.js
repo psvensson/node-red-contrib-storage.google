@@ -22,11 +22,13 @@ let flowFile = 'flow'
 
 let googleStorage = {
 
-  init: (_settings)=> {
+  init: (_settings, runtime)=> {
     return new Promise((resolve,reject)=>{
-      console.log('google-storage init')
+      console.log('google-storage init adminApi is '+runtime.adminApi)
+      console.dir(runtime.adminApi.httpAdmin)
       //console.dir(_settings)
       googleStorage.settings = _settings;
+      googleStorage.runtime = runtime
 
       if(!_settings.googleStorageBucket || !_settings.googleProjectId || !_settings.googleCredentials){
         reject('Cannot initialize without Google Cloud settings')
@@ -59,7 +61,9 @@ let googleStorage = {
           let flows = flowref.val()
           if(flows){
             console.dir(flows)
-            nodered.flows.setFlows(flows[0])
+            googleStorage.runtime.nodes.loadFlows(true).then(function() {
+              console.log('--- flow reloaded from google cloud storage plugin')
+            })
           }
         } else {
           googleStorage.settingFlow = false

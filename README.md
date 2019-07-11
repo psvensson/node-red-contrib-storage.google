@@ -1,6 +1,8 @@
 # node-red-contrib-storage.google
 A node red storage module which uses Google Storage  (loosely based on the AWS S3 storage module)
 
+This module supports automatic reloading of flows.
+
 ## Installation
 
     npm i --save node-red-contrib-storage-google
@@ -16,8 +18,8 @@ You must also set the following new settings to be able to make use of the stora
     googleStorageAppname: 'mycoolapp',
     googleStorageBucket: 'something-12345.appspot.com',
     googleProjectId: 'something-12345',
-    googleFirebaseReload: true,
-    googleDbUrl: 'https://something-12345.firebaseio.com',
+    googleFirebaseReload: true,         // optional
+    googleDbUrl: 'https://something-12345.firebaseio.com',  // optional
     googleCredentials: {
       "type": "service_account",
       "project_id": "something-12345",
@@ -49,10 +51,15 @@ The other google* settings can be found in the very first tab.
 Any node-red instance running with the google cloud storage plugin set to a specific configuration will
 share settings, flows, library entities, et.c. with all others with the same setup.
 
-This means that a developer can develop locally with the google cloud storage plugin, and be abel to have the changes shared to other node-red instances
+This means that a developer can develop locally with the google cloud storage plugin, and be able to have the changes shared to other node-red instances
 running in the cloud, perhaps in docker containers, long running or as cloud functions/lambdas.
 
-However, currently the other instances need to be restarted to read in the new configuration.
-Work i ongoing to make this automatic, but for now you will have to find out a separate way to restart or reload the instances.
+To also enable live reloading of all instances, you must use a serivce account certificate from firebase and also set
+the properties 'googleFirebaseReload' and 'googleDbUrl'.
+
+This will let the plugin register listeners for a specific path in the reactive firebase service, so that they will get a callback whenever 
+the flows have changed (been deployed by the developer). Firebase Rtdb support up to 100000 simultaneous connections, which is then the upper limit for cloud instances.
+
+This usage of firebase is well below the free tier so moderate use (100 instance perhaps?) will never cost anything.
  
  

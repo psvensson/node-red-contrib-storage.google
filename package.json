@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-storage-google",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A node red storage module which uses Google Storage  (based on the AWS S3 storage module)",
   "main": "index.js",
   "scripts": {
