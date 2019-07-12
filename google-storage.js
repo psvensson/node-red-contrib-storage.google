@@ -24,8 +24,8 @@ let googleStorage = {
 
   init: (_settings, runtime)=> {
     return new Promise((resolve,reject)=>{
-      console.log('google-storage init adminApi is '+runtime.adminApi)
-      console.dir(runtime.adminApi.httpAdmin)
+      //console.log('google-storage init adminApi is '+runtime.adminApi)
+      //console.dir(runtime.adminApi.httpAdmin)
       //console.dir(_settings)
       googleStorage.settings = _settings;
       googleStorage.runtime = runtime
@@ -54,17 +54,15 @@ let googleStorage = {
       databaseURL: googleStorage.settings.googleDbUrl
     });
     setTimeout(()=>{
-      console.log('firebase admin SDK initialized. listening on "'+googleStorage.appname+'"')
+      console.log('-------------------------------------- firebase admin SDK initialized. listening on "'+googleStorage.appname+'"')
       admin.database().ref(googleStorage.appname).on('value', (flowref)=>{
         if(googleStorage.settingFlow !== true){
           console.log('firebase listener got update for new flow')
           let flows = flowref.val()
-          if(flows){
-            //console.dir(flows)
-            googleStorage.runtime.nodes.loadFlows(true).then(function() {
-              console.log('--- flow reloaded from google cloud storage plugin')
-            })
-          }
+          googleStorage.runtime.nodes.loadFlows(true).then(function()
+          {
+            console.log('--- flow reloaded from google cloud storage plugin')
+          })
         } else {
           googleStorage.settingFlow = false
         }
@@ -149,14 +147,17 @@ let googleStorage = {
     }
     if(googleStorage.settings.googleFirebaseReload === true){
       googleStorage.settingFlow = true
-      console.log('updating flows through firebase')
-      let dbref = admin.database().ref(googleStorage.appname)
-      //console.log('dbref = '+dbref+' typeof = '+(typeof dbref))
-      let setref = dbref.set(flows)
-      //console.log('setref = '+setref+' typeof = '+(typeof setref))
-      setref.then(()=>{
-        console.log('updated flows through firebase')
-        this.saveData(flowFile, flowData, true) ;
+      this.saveData(flowFile, flowData, true).then(()=>{
+        console.log('updating flows through firebase')
+        let dbref = admin.database().ref(googleStorage.appname)
+        //console.log('dbref = '+dbref+' typeof = '+(typeof dbref))
+        let setref = dbref.set(flows)
+        //console.log('setref = '+setref+' typeof = '+(typeof setref))
+        if(setref){
+          setref.then(()=>{
+            console.log('updated flows through firebase')
+          })
+        }
       })
     } else {
       this.saveData(flowFile, flowData, true) ;
@@ -234,32 +235,31 @@ let googleStorage = {
   },
 
   saveData: function(entryType, dataEntry, bypass) {
-    //console.log('------------------------------------------- google-storage saveData for "'+entryType+'" bypass = '+bypass)
+    console.log('------------------------------------------- google-storage saveData for "'+entryType+'" bypass = '+bypass)
     //console.dir(dataEntry)
-    if(!dataEntry){
-      dataEntry = ''
-    } else {
-      return new Promise(function(resolve,reject) {
-        this.getBucket().then((bucket)=>{
-          //console.log('-----------------------saveData saving file "'+entryType+'"')
-          //console.dir(dataEntry)
-          //console.log('-----------------------saveData')
-          let f = googleStorage.appname + '/' + entryType + (entryType.indexOf('.js') > -1 ? '' : '.json')
-          //console.log('f = "'+f+'"')
-          let file = bucket.file(f);
-          let data = Buffer.from(bypass === true ? dataEntry : JSON.stringify(dataEntry));
-          file.save(data, function(err) {
-            if (err) {
-              console.log('save ERROR: '+err)
-              reject(err.toString());
-            } else {
-              //console.log('saved OK')
-              resolve();
-            }
-          });
-        })
-      }.bind(this))
-    }
+    return new Promise(function(resolve,reject) {
+      if(!dataEntry){
+        dataEntry = ''
+      }
+      this.getBucket().then((bucket) => {
+        //console.log('-----------------------saveData saving file "'+entryType+'"')
+        //console.dir(dataEntry)
+        //console.log('-----------------------saveData')
+        let f    = googleStorage.appname + '/' + entryType + (entryType.indexOf('.js') > -1 ? '' : '.json')
+        //console.log('f = "'+f+'"')
+        let file = bucket.file(f);
+        let data = Buffer.from(bypass === true ? dataEntry : JSON.stringify(dataEntry));
+        file.save(data, function(err) {
+          if (err) {
+            console.log('save ERROR: ' + err)
+            reject(err.toString());
+          } else {
+            console.log('saved OK')
+            resolve();
+          }
+        });
+      })
+    }.bind(this))
   },
 
   saveLibraryEntry: function(type,path,meta,body) {
