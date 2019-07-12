@@ -1,8 +1,8 @@
 {
   "name": "node-red-contrib-storage-google",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A node red storage module which uses Google Storage  (based on the AWS S3 storage module)",
-  "main": "index.js",
+  "main": "google-storage.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

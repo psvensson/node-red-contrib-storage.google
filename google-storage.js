@@ -33,7 +33,7 @@ let googleStorage = {
       if(!_settings.googleStorageBucket || !_settings.googleProjectId || !_settings.googleCredentials){
         reject('Cannot initialize without Google Cloud settings')
       } else {
-        console.log('---- *** node-red google cloud storage got all needed settings! *** ---')
+        //console.log('---- *** node-red google cloud storage got all needed settings! *** ---')
         if(_settings.flowFile){
           flowFile = _settings.flowFile.replace('.json','')
         }
@@ -48,7 +48,7 @@ let googleStorage = {
   },
 
   setupFirebaseListener: ()=>{
-    console.log('setting up firebase listener for flow reloading')
+    //console.log('setting up firebase listener for flow reloading')
     admin.initializeApp({
       credential: admin.credential.cert(googleStorage.settings.googleCredentials),
       databaseURL: googleStorage.settings.googleDbUrl
@@ -60,7 +60,7 @@ let googleStorage = {
           console.log('firebase listener got update for new flow')
           let flows = flowref.val()
           if(flows){
-            console.dir(flows)
+            //console.dir(flows)
             googleStorage.runtime.nodes.loadFlows(true).then(function() {
               console.log('--- flow reloaded from google cloud storage plugin')
             })
@@ -73,7 +73,7 @@ let googleStorage = {
   },
 
   prepopulateFlows: (resolve)=> {
-    console.log('google-storage prepopulateFlows called')
+    //console.log('google-storage prepopulateFlows called')
     googleStorage.getBucket().then((bucket) => {
       googleStorage.getFlows().then((existing_flows)=> {
         //console.log('existing flows is')
@@ -151,9 +151,9 @@ let googleStorage = {
       googleStorage.settingFlow = true
       console.log('updating flows through firebase')
       let dbref = admin.database().ref(googleStorage.appname)
-      console.log('dbref = '+dbref+' typeof = '+(typeof dbref))
+      //console.log('dbref = '+dbref+' typeof = '+(typeof dbref))
       let setref = dbref.set(flows)
-      console.log('setref = '+setref+' typeof = '+(typeof setref))
+      //console.log('setref = '+setref+' typeof = '+(typeof setref))
       setref.then(()=>{
         console.log('updated flows through firebase')
         this.saveData(flowFile, flowData, true) ;
@@ -172,7 +172,7 @@ let googleStorage = {
   },
   getSettings: function() {
     return new Promise(function(resolve,reject)  {
-      console.log('google-storage.getSettings called')
+      //console.log('google-storage.getSettings called')
 
       this.getData("settings").then((ssettings) => {
         if (ssettings) {
@@ -188,7 +188,7 @@ let googleStorage = {
   },
 
   saveSettings: function(settings) {
-    console.log('------------------------------------------- saveSettings')
+    //console.log('------------------------------------------- saveSettings')
     let props = ['functionGlobalContext', 'userDir', 'storageModule']
     var s = {}
     for(var p in settings){
@@ -202,18 +202,18 @@ let googleStorage = {
   },
 
   getData: function(entryType) {
-    console.log('------------------------------------------- getData reading single file from path "'+entryType+'"')
+    //console.log('------------------------------------------- getData reading single file from path "'+entryType+'"')
     return new Promise(function(resolve,reject) {
       this.getBucket().then((bucket)=>{
         let fname = googleStorage.appname + '/' + entryType+'.json'
-        console.log('getData checking if file '+fname+' exists')
+        //console.log('getData checking if file '+fname+' exists')
         let file = bucket.file(fname)
         file.exists().then((exists)=>{
-          console.log('getData file '+entryType+' exists = '+exists[0])
+          //console.log('getData file '+entryType+' exists = '+exists[0])
           if(exists[0]){
-            console.log('downloading file '+entryType)
+            //console.log('downloading file '+entryType)
             file.download().then((file)=>{
-              console.log('storage-read.getData got file '+entryType)
+              //console.log('storage-read.getData got file '+entryType)
               //console.dir(file)
               let rv = JSON.parse(file.toString())
               //console.log('getData returning: '+rv)
@@ -221,7 +221,7 @@ let googleStorage = {
               resolve(rv)
             })
           }else {
-            console.log('getData returning undefined')
+            console.log('googe-storage getData returning undefined for "'+entryType+'"')
             resolve([])
           }
         })
@@ -234,7 +234,7 @@ let googleStorage = {
   },
 
   saveData: function(entryType, dataEntry, bypass) {
-    console.log('------------------------------------------- google-storage saveData for "'+entryType+'" bypass = '+bypass)
+    //console.log('------------------------------------------- google-storage saveData for "'+entryType+'" bypass = '+bypass)
     //console.dir(dataEntry)
     if(!dataEntry){
       dataEntry = ''
@@ -253,7 +253,7 @@ let googleStorage = {
               console.log('save ERROR: '+err)
               reject(err.toString());
             } else {
-              console.log('saved OK')
+              //console.log('saved OK')
               resolve();
             }
           });
@@ -263,9 +263,9 @@ let googleStorage = {
   },
 
   saveLibraryEntry: function(type,path,meta,body) {
-    console.log('------------------------------------------- saveLibrary called for type='+type+', path='+path+', meta='+meta+', body='+body)
+    //console.log('------------------------------------------- saveLibrary called for type='+type+', path='+path+', meta='+meta+', body='+body)
     let key =  "lib/" + type + (path.substr(0) != "/" ? "/" : "") + path;
-    console.log('saveLibraryEntry for key "'+key+'"')
+    //console.log('saveLibraryEntry for key "'+key+'"')
     return this.saveData(key, body)
   },
 
@@ -273,7 +273,7 @@ let googleStorage = {
     return new Promise(function(resolve,reject)
     {
       let key = "lib/" + type + (path.substr(0) != "/" ? "/" : "") + path;
-      console.log("------------------------------------------- get library entry: " + type + ":" + path);
+      //console.log("------------------------------------------- get library entry: " + type + ":" + path);
       if(key.lastIndexOf('.') > key.length-4){
         return this.getSingleLibraryFile(key)
       } else {
@@ -287,20 +287,20 @@ let googleStorage = {
       this.getBucket().then((bucket) => {
         let file = bucket.file(key)
         file.exists().then((exists) => {
-          console.log('getLibraryEntry file ' + key + ' exists = ' + exists[0])
+          //console.log('getLibraryEntry file ' + key + ' exists = ' + exists[0])
           if (exists[0]) {
-            console.log('downloading file ' + key)
+            //console.log('downloading file ' + key)
             file.get().then((res) => {
-              console.log('storage-read.getLibraryEntry got file info ' + res)
-              console.dir(res)
+              //console.log('storage-read.getLibraryEntry got file info ' + res)
+              //console.dir(res)
               let file = res[0]
               //console.dir(file)
               let rv   = JSON.parse(file.toString())
-              console.log('getLibraryEntry returning: ' + rv)
+              //console.log('getLibraryEntry returning: ' + rv)
               resolve(rv)
             })
           } else {
-            console.log('getLibraryEntry returning undefined')
+            console.log('getLibraryEntry returning undefined for "'+key+'"')
             resolve([])
           }
         })
@@ -320,11 +320,11 @@ let googleStorage = {
         }
 
         bucket.getFiles(options).then((files)=>{
-          console.log('got file listing')
+          //console.log('got file listing')
           //console.dir(files[0])
           let f = files[0].filter((e)=>{ return e.name[e.name.length-1] !== '/' })
-          console.log('getLibraryDirectoryListing for path '+key)
-          console.dir(f)
+          //console.log('getLibraryDirectoryListing for path '+key)
+          //console.dir(f)
           resolve(f)
         })
       })
