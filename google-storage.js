@@ -101,7 +101,7 @@ let googleStorage = {
     return new Promise(function(resolve,reject) {
       //console.log('getBucket called')
       if (this.bucket)  {
-        //console.log('getBucket found bucket')
+        console.log('getBucket found bucket')
         //console.dir(this.bucket)
         resolve(this.bucket)
       } else {
@@ -119,7 +119,7 @@ let googleStorage = {
         //console.dir(opts)
         try {
           // Creates the new bucket
-          //console.log('creating bucket with name "'+bucketName+'"')
+          console.log('creating bucket with name "'+bucketName+'"')
           this.bucket = storage.bucket(bucketName)
           resolve(this.bucket)
         }
@@ -137,31 +137,37 @@ let googleStorage = {
   },
 
   saveFlows: function(flows) {
-    console.log('------------------------------------------- saveFlow called for')
-    //console.dir(flows)
-    let flowData
-    if (googleStorage.settings.flowFilePretty) {
-      flowData = JSON.stringify(flows,null,4);
-    } else {
-      flowData = JSON.stringify(flows);
-    }
-    if(googleStorage.settings.googleFirebaseReload === true){
-      googleStorage.settingFlow = true
-      this.saveData(flowFile, flowData, true).then(()=>{
-        console.log('updating flows through firebase')
-        let dbref = admin.database().ref(googleStorage.appname)
-        //console.log('dbref = '+dbref+' typeof = '+(typeof dbref))
-        let setref = dbref.set(flows)
-        //console.log('setref = '+setref+' typeof = '+(typeof setref))
-        if(setref){
-          setref.then(()=>{
-            console.log('updated flows through firebase')
-          })
-        }
-      })
-    } else {
-      this.saveData(flowFile, flowData, true) ;
-    }
+    return new Promise(function(resolve,reject)
+    {
+      console.log('------------------------------------------- saveFlow called for')
+      //console.dir(flows)
+      let flowData
+      if (googleStorage.settings.flowFilePretty)
+      {
+        flowData = JSON.stringify(flows, null, 4);
+      } else
+      {
+        flowData = JSON.stringify(flows);
+      }
+      if (googleStorage.settings.googleFirebaseReload === true)
+      {
+        googleStorage.settingFlow = true
+        this.saveData(flowFile, flowData, true).then(() =>
+        {
+          console.log('updating flows through firebase')
+          let dbref = admin.database().ref(googleStorage.appname)
+          //console.log('dbref = '+dbref+' typeof = '+(typeof dbref))
+          dbref.set(flows)
+          //console.log('setref = '+setref+' typeof = '+(typeof setref))
+          console.log('updated flows through firebase')
+          resolve()
+        })
+      } else
+      {
+        this.saveData(flowFile, flowData, true);
+        resolve()
+      }
+    }.bind(this))
   },
   getCredentials: function() {
     console.log('------------------------------------------- getCredentials')
@@ -241,12 +247,13 @@ let googleStorage = {
       if(!dataEntry){
         dataEntry = ''
       }
+      console.log('getting bucket..')
       this.getBucket().then((bucket) => {
-        //console.log('-----------------------saveData saving file "'+entryType+'"')
+        console.log('-----------------------saveData saving file "'+entryType+'"')
         //console.dir(dataEntry)
         //console.log('-----------------------saveData')
         let f    = googleStorage.appname + '/' + entryType + (entryType.indexOf('.js') > -1 ? '' : '.json')
-        //console.log('f = "'+f+'"')
+        console.log('f = "'+f+'"')
         let file = bucket.file(f);
         let data = Buffer.from(bypass === true ? dataEntry : JSON.stringify(dataEntry));
         file.save(data, function(err) {
