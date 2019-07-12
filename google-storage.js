@@ -59,7 +59,7 @@ let googleStorage = {
         if(googleStorage.settingFlow !== true){
           console.log('firebase listener got update for new flow')
           let flows = flowref.val()
-          console.log(JSON.stringify(flows))
+          //console.log(JSON.stringify(flows))
 
           googleStorage.runtime.nodes.loadFlows(true).then(function()
           {
