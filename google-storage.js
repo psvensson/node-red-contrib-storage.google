@@ -59,6 +59,8 @@ let googleStorage = {
         if(googleStorage.settingFlow !== true){
           console.log('firebase listener got update for new flow')
           let flows = flowref.val()
+          console.log(JSON.stringify(flows))
+
           googleStorage.runtime.nodes.loadFlows(true).then(function()
           {
             console.log('--- flow reloaded from google cloud storage plugin')
@@ -101,7 +103,7 @@ let googleStorage = {
     return new Promise(function(resolve,reject) {
       //console.log('getBucket called')
       if (this.bucket)  {
-        console.log('getBucket found bucket')
+        //console.log('getBucket found bucket')
         //console.dir(this.bucket)
         resolve(this.bucket)
       } else {
@@ -119,7 +121,7 @@ let googleStorage = {
         //console.dir(opts)
         try {
           // Creates the new bucket
-          console.log('creating bucket with name "'+bucketName+'"')
+          //console.log('creating bucket with name "'+bucketName+'"')
           this.bucket = storage.bucket(bucketName)
           resolve(this.bucket)
         }
