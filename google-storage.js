@@ -48,28 +48,34 @@ let googleStorage = {
   },
 
   setupFirebaseListener: ()=>{
+    let global = this.context().global
+    let init = (global.get('firebase') !== undefined)
     //console.log('setting up firebase listener for flow reloading')
-    admin.initializeApp({
-      credential: admin.credential.cert(googleStorage.settings.googleCredentials),
-      databaseURL: googleStorage.settings.googleDbUrl
-    });
-    setTimeout(()=>{
-      console.log('-------------------------------------- firebase admin SDK initialized. listening on "'+googleStorage.appname+'"')
-      admin.database().ref(googleStorage.appname).on('value', (flowref)=>{
-        if(googleStorage.settingFlow !== true){
-          console.log('firebase listener got update for new flow')
-          let flows = flowref.val()
-          //console.log(JSON.stringify(flows))
+    if(!init){
+      admin.initializeApp({
+        credential: admin.credential.cert(googleStorage.settings.googleCredentials),
+        databaseURL: googleStorage.settings.googleDbUrl
+      });
+      setTimeout(()=>{
+        console.log('-------------------------------------- firebase admin SDK initialized. listening on "'+googleStorage.appname+'"')
+        admin.database().ref(googleStorage.appname).on('value', (flowref)=>{
+          if(googleStorage.settingFlow !== true){
+            console.log('firebase listener got update for new flow')
+            let flows = flowref.val()
+            //console.log(JSON.stringify(flows))
 
-          googleStorage.runtime.nodes.loadFlows(true).then(function()
-          {
-            console.log('--- flow reloaded from google cloud storage plugin')
-          })
-        } else {
-          googleStorage.settingFlow = false
-        }
-      })
-    }, 5000)
+            googleStorage.runtime.nodes.loadFlows(true).then(function()
+            {
+              console.log('--- flow reloaded from google cloud storage plugin')
+            })
+          } else {
+            googleStorage.settingFlow = false
+          }
+        })
+      }, 5000)
+    } else {
+     console.log('google-storage.setupFirebaseListener skipped initialzing firebase-admin since it was already setup, either by us before or by a flow using firebase-admin')
+    }
   },
 
   prepopulateFlows: (resolve)=> {
