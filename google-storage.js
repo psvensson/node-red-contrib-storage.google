@@ -48,7 +48,6 @@ let googleStorage = {
   },
 
   setupFirebaseListener: ()=>{
-    let global = this.context().global
     let init = !(admin.apps.length === 0)
     //console.log('setting up firebase listener for flow reloading')
     if(!init){
